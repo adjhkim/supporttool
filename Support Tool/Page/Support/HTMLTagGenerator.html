@@ -1,0 +1,138 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Support Tool</title>
+
+<link rel="stylesheet" type="text/css" href="../../CSS/Style.css">
+<script type="text/javascript" src="../../JavaScript/Menubar.js"></script>
+<script type="text/javascript" src="../../JQuery/jquery-3.5.1.min.js"></script>
+<style>
+	th { height:33px; }
+</style>
+<script type="text/javascript">
+	$(function(){
+		$('#type').change(function(){
+			$('#type').val();
+			var option = $('#type').val();
+			$('#rowCol').empty();
+			
+			var result = "";
+			if (option == "Box") {
+				result += "";
+			}
+			else if (option == "Table") {
+				result += "가로&nbsp;"
+				result += "<input type='number' id='col' class='input-small' style='font-size:12px;width:100px;height:33px;' autocomplete='off'>";
+				result += "&emsp;"
+				result += "세로&nbsp;"
+				result += "<input type='number' id='row' class='input-small' style='font-size:12px;width:100px;height:33px;' autocomplete='off'>";
+				result += "&emsp;"
+			}
+			$('#rowCol').html(result);
+			$('#resultCopy').html("HTML 태그");
+		})
+	});
+</script>
+<script type="text/javascript">
+	$(function(){
+		$('#btn-submit').click(function(){
+			$('#type').val();
+			$('#inputText').val();
+			var option = $('#type').val();
+			var log = $('#inputText').val();
+			var resultPreview = "";
+			var resultString = "";
+			
+			if (option == "Box") {
+				resultPreview += '<div style="background:#eee;border:1px solid #ccc;color:#222;font-size:15px;padding:10px;width:95%;">';
+				resultPreview += log.replace(/\n/g, "<br>");
+				resultPreview += '</div><br>';
+			}
+			else if (option == "Table") {
+				$('#col').val();
+				$('#row').val();
+				var colNo = $('#col').val();
+				var rowNo = $('#row').val();
+				var spl = log.split("\u000A");
+				
+				resultPreview += '<table style="width:100%;border-collapse:collapse;border-spacing:0;">';
+				for (var i = 0; i < rowNo; i++) {
+					if (i==0) {
+						resultPreview += '<tr style="background:#eee;border:1px solid #ccc;">';
+					}
+					else {
+						resultPreview += '<tr style="background:#fff;border:1px solid #ccc;">';
+					}
+					
+					for (var j = 0; j < colNo; j++) {
+						resultPreview += '<th style="border:1px solid #ccc;padding:5px;font-weight:400;font-size:15px;color:#222;text-align:center;">';
+						try {
+							if (spl[i].split("\u0009")[j]==null) {
+								resultPreview += "";
+							}
+							else {
+								resultPreview += spl[i].split("\u0009")[j];
+							}
+						}
+						catch (e) {
+							resultPreview += "";
+						}
+						resultPreview += '</th>';
+					}
+					resultPreview += '</tr>'
+				}
+				resultPreview += '</table>';
+			}
+			resultString = resultPreview.replaceAll("<","&lt;").replaceAll(">","&gt;");
+
+			$('#preview').html(resultPreview);
+			$('#resultTag').html(resultString);
+			$('#resultCopy').html("HTML 태그");
+		})
+		
+		$('#resultTag').click(function(){
+			document.execCommand("copy");
+			
+			var resultCopy = "<a style='color:#2e6da4;'>" + "텍스트 복사가 완료되었습니다." + "</a>";
+			$('#resultCopy').html(resultCopy);
+			$('#resultCopy').fadeOut(0);
+			$('#resultCopy').fadeIn(500);
+		})
+	});
+</script>
+</head>
+
+<Header><script type="text/javascript">createNavBar(1);</script></Header>
+
+<body>
+<section><strong>HTML 태그 생성</strong><hr></section>
+ 
+<div style="width:30%;" class="section-left">
+	<section style="margin:0 20px 20px 20px;">
+		형식
+		<select id="type" style="width:100px;">
+			<option value="Box">상자 형식</option>
+			<option value="Table">표 형식</option>
+		</select>&emsp;
+		
+		<div style="display:inline-block;" id="rowCol"></div>
+		
+		<input type="button" id="btn-submit" name="btn-submit" value="실행" class="btn btn-blue"><br><br>
+		
+		<table style="width:100%;">
+			<thead><tr><th id="resultCopy">HTML 태그</th></tr></thead>
+			<tbody><tr><th id="resultTag" style="user-select:all;cursor:pointer;word-break:break-all;"></th></tr></tbody>
+		</table>
+	</section>
+</div>
+
+<div style="width:65%;" class="section-left">
+	<section style="margin:0 20px 20px 20px;">
+		텍스트
+		<textarea id="inputText" style="width:100%;height:100px;resize:none;" class="input-big" spellcheck="false" placeholder="1. 여기에 텍스트를 작성 후 실행하면 해당 텍스트가 포함된 상태로 태그가 만들어 집니다.&#13;&#10;&#13;&#10;2. 표 형식의 경우 Excel에서 먼저 표를 만들고, 해당 표를 여기에 붙여 넣으면 각각의 행&열에 맞춰 텍스트가 들어갑니다."></textarea><br>
+		미리보기<br>
+		<div id="preview"></div>
+	</section>
+</div>
+</body>
+</html>

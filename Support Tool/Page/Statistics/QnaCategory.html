@@ -1,0 +1,426 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Support Tool</title>
+
+<link rel="stylesheet" type="text/css" href="../../CSS/Style.css">
+<script type="text/javascript" src="../../JavaScript/Menubar.js"></script>
+<script type="text/javascript" src="../../JavaScript/CS_Category.js"></script>
+<script type="text/javascript" src="../../JQuery/jquery-3.5.1.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+<style>
+	body::-webkit-scrollbar {
+		display: none;
+	}
+	
+	.popup-background {
+        display: none;
+        position: fixed;
+        content: "";
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        top: 0;
+        left: 0;
+    }
+	
+	.popup-box {
+        display: none;
+		font-family: Noto Sans KR;
+        position: fixed;
+		width: 1100px;
+		height: 70%;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		padding: 0 20px 20px 20px;
+        background: #eee;
+		box-shadow: 4px 4px 4px #000;
+		user-select: none;
+    }
+	
+	#clearFix {
+		clear: left;
+	}
+	
+	.popup-box .popupHeader {
+		display: inline-block;
+		position: fixed;
+		background-color: #eee;
+		width: inherit;
+		padding-top: 10px;
+		margin-top: 5px;
+	}
+	
+	.popup-box .popupContent {
+		height: 92.5%;
+		margin-top: 5px;
+		overflow: auto;
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
+	
+	.popup-box .popupContent::-webkit-scrollbar {
+		display: none;
+	}
+	
+	#popup-close {
+		box-shadow: none;
+		text-shadow: none;
+		border-radius: 2px;
+		transition: all ease 0.25s;
+	}
+	
+	#popup-close:hover {
+		background-color: #424242;
+		color: #fff;
+	}
+
+	select {
+		border-radius: 2px;
+		font-size: 12px;
+		cursor: pointer;
+		color: #fff;
+		background-color: #337ab7;
+		border-color: #2e6da4;
+	}
+	
+	.btn {
+		padding: 5px 25px;
+		border-radius: 2px;
+		box-shadow: none;
+		font-size: 12px;
+	}
+	
+	table {
+		width: 100%;
+	}
+	
+	thead {
+		border-color: #2e6da4;
+	}
+	
+	thead tr th {
+		color: #fff;
+		background-color: #337ab7;
+	}
+	
+	tbody {
+		border: 0;
+		background-color: transparent;
+	}
+	
+	tbody tr {
+		cursor: pointer;
+		transition: all ease 0.1s;
+	}
+	
+	tbody tr:hover {
+		background-color: #ddd;
+	}
+	
+	tbody tr th {
+		border-bottom: 1px solid #ccc;
+		color: #000;
+	}
+	
+	.total {
+		color: #fff;
+		background-color: #337ab7;
+		font-weight: 500;
+	}
+	
+	.firstRank {
+		background-color: #F6CED8;
+	}
+	
+	.firstRank th {
+		font-weight: bold;
+	}
+	
+	.firstMark {
+		background-color: #FF0000;
+		color: #fff;
+		padding: 1px 6px;
+		margin-right: 10px;
+		border-radius: 100%;
+		font-weight: bold;
+	}
+	
+	.firstRank:hover {
+		background-color: #F5A9BC;
+	}
+	
+	.secondRank {
+		background-color: #F5D0A9;
+	}
+	
+	.secondRank th {
+		font-weight: bold;
+	}
+	
+	.secondMark {
+		background-color: #FF8000;
+		color: #fff;
+		padding: 1px 6px;
+		margin-right: 10px;
+		border-radius: 100%;
+		font-weight: bold;
+	}
+	
+	.secondRank:hover {
+		background-color: #F7BE81;
+	}
+	
+	.thirdRank {
+		background-color: #FFF2B0;
+	}
+	
+	.thirdRank th {
+		font-weight: bold;
+	}
+	
+	.thirdMark {
+		background-color: #FFD700;
+		color: #fff;
+		padding: 1px 6px;
+		margin-right: 10px;
+		border-radius: 100%;
+		font-weight: bold;
+	}
+	
+	.thirdRank:hover {
+		background-color: #F0E68C;
+	}
+	
+	.percentMark {
+		background-color: #aaa;
+		color: #fff;
+		padding: 1px 6px;
+		margin-left: 10px;
+		border-radius: 2px;
+		font-weight: bold;
+	}
+</style>
+<script type="text/javascript">
+$(document).ready(function(){
+	$("#brandType").change(function(){
+		var target = $(".btn-blue");
+		loadData(target);
+	});
+});
+</script>
+<script type="text/javascript">
+function loadData(target) {
+	$(".btn").not(".popup-box .popupHeader .btn").removeClass("btn-blue");
+	$(target).addClass("btn-blue");
+	
+	var brand = $("#brandType").val();
+	var year = $(target).val();
+	fYearlyCategoryDataKR(brand, year);
+	
+	var resultBody = "";
+	var columnSum = [];
+	var categorySum = [];
+	for(var row = 0; row < vYearlyCategoryDataKR.length; row++) {
+		var rowSum = 0;
+		resultBody += "<tr onclick='openPopup(this)'>";
+		resultBody += "<th>" + (row+1) + "</th>";
+		for(var column = 0; column < vYearlyCategoryDataKR[row].length; column++) {
+			if(column==0) {
+				resultBody += "<th name='" + vYearlyCategoryDataKR[row][column] + "'>" + vYearlyCategoryDataKR[row][column] + "</th>";
+			} else {
+				resultBody += "<th>" + vYearlyCategoryDataKR[row][column].toLocaleString() + "</th>";
+			}
+			
+			if(column!=0) {
+				rowSum += vYearlyCategoryDataKR[row][column];
+			}
+			
+			if(row==0) {
+				columnSum.push(vYearlyCategoryDataKR[row][column]);
+			} else {
+				var before = columnSum[column];
+				var current = vYearlyCategoryDataKR[row][column];
+				var after = Number(before) + Number(current);
+				columnSum.splice(column, 1, after);
+			}
+		}
+		categorySum.push(rowSum);
+		resultBody += "<th>" + rowSum.toLocaleString() + "</th>";
+		resultBody += "</tr>";
+	}
+	resultBody += "</tr>";
+	$("tbody").html(resultBody);
+	
+	var totalSum = 0;
+	var resultSum = "";
+	resultSum += "<tr onclick='openPopup(this)'>";
+	resultSum += "<th class='total' name='합계' colspan=2>" + "합계" + "</th>";
+	for(var month = 1; month <= 12; month++) {
+		resultSum += "<th>" + columnSum[month].toLocaleString() + "</th>";
+		totalSum += columnSum[month];
+	}
+	resultSum += "<th>" + totalSum.toLocaleString() + "</th>";
+	resultSum += "</tr>";
+	$("tbody").append(resultSum);
+	
+	for(var row = 0; row < $("tbody tr").length; row++) {
+		for(var column = 0; column < $("thead tr th").length; column++) {
+			var tableLocation = $("tbody tr").eq(row).find("th").eq(column);
+			if(tableLocation.html()==0) {
+				tableLocation.css("color", "#ccc");
+			}
+		}
+	}
+	findRanking(categorySum);
+	
+	$("tbody tr").click(function() {
+		createChart(this);
+	});
+}
+</script>
+<script type="text/javascript">
+function findRanking(data) {
+	var cloneData = [...data];
+	cloneData.sort((a, b) => {
+		return b - a;
+	});
+	
+	var maxRow = $("tbody tr").length-1;
+	var maxColumn = $("thead tr th").length-2;
+	var totalQna = $("tbody tr").eq(maxRow).find("th").eq(maxColumn).html().replaceAll(",", "");
+
+	var firstValIdx = data.indexOf(cloneData[0]);
+	var firstValRow = $("tbody tr").eq(firstValIdx);
+	var firstValPercent = ((cloneData[0]/Number(totalQna))*100).toFixed(0);
+	firstValRow.addClass("firstRank");
+	firstValRow.find("th").eq(1).prepend("<span class='firstMark'>1</span>");
+	firstValRow.find("th").eq(1).append("<span class='percentMark'>" + firstValPercent + "%" + "</span>");
+	
+	var secondValIdx = data.indexOf(cloneData[1]);
+	var secondValRow = $("tbody tr").eq(secondValIdx);
+	var secondValPercent = ((cloneData[1]/Number(totalQna))*100).toFixed(0);
+	secondValRow.addClass("secondRank");
+	secondValRow.find("th").eq(1).prepend("<span class='secondMark'>2</span>");
+	secondValRow.find("th").eq(1).append("<span class='percentMark'>" + secondValPercent + "%" + "</span>");
+	
+	var thirdValIdx = data.indexOf(cloneData[2]);
+	var thirdValRow = $("tbody tr").eq(thirdValIdx);
+	var thirdValPercent = ((cloneData[2]/Number(totalQna))*100).toFixed(0);
+	thirdValRow.addClass("thirdRank");
+	thirdValRow.find("th").eq(1).prepend("<span class='thirdMark'>3</span>");
+	thirdValRow.find("th").eq(1).append("<span class='percentMark'>" + thirdValPercent + "%" + "</span>");
+}
+</script>
+<script type="text/javascript">
+function createChart(target) {
+	$('.popup-box .popupContent iframe').remove();
+	$('.popup-box .popupContent canvas').remove();
+	$(".popup-box .popupContent").html("<canvas id='categoryChart'></canvas>");
+	
+	var dataset = [];
+	var lastRowCheck = Math.floor($(target).index()/($("tbody tr").length-1));
+	for(var month = 1; month <= 12; month++) {
+		var data = Number($(target).children().eq(month+1-lastRowCheck).html().replaceAll(",", ""));
+		dataset.push(data);
+	}
+	var labelName = $(target).children().eq(1-lastRowCheck).attr("name");
+	var chartType = $(".popup-box .popupHeader .btn-blue").attr("id");
+	
+	new Chart(document.getElementById("categoryChart"), {
+		type: chartType,
+		data: {
+			labels: [ "1월", "2월", "3월", "4월", "5월", "6월", "7월", "8월", "9월", "10월", "11월", "12월" ],
+			datasets: [{ 
+				data: dataset,
+				label: labelName,
+				backgroundColor: "rgba(51, 122, 183, 0.5)",
+				borderColor: "rgb(51, 122, 183)",
+				borderWidth: 1,
+				fill: true
+			}]
+		},
+		options: {
+			title: {
+				display: true,
+				text: "문의 카테고리 차트"
+			}
+		}
+	});
+}
+
+function selectChart(target) {
+	$(".popup-box .popupHeader .btn").removeClass("btn-blue");
+	$(target).addClass("btn-blue");
+	
+	var selectedIdx = $(".popup-box .popupHeader #idxCheck").text();
+	var selectedRow = $("tbody tr").eq(selectedIdx);
+	createChart(selectedRow);
+}
+</script>
+<script type="text/javascript">
+function openPopup(target) {
+	$('.popup-box').css('display', 'inline-block');
+	$('.popup-background').css('display', 'inline-block');
+	$('html, body').css('overflow', 'hidden');
+	
+	$(".popup-box .popupHeader #idxCheck").html($(target).index());
+}
+
+function closePopup() {
+	$('.popup-box').css('display', 'none');
+	$('.popup-background').css('display', 'none');
+	$('html, body').css('overflow', '');
+}
+</script>
+</head>
+
+<Header><script type="text/javascript">createNavBar(1);</script></Header>
+
+<body>
+<section>
+	<strong>문의 카테고리 분석</strong><hr>
+	<select id="brandType">
+		<option value="B">분류 01</option>
+		<option value="A">분류 02</option>
+	</select>&nbsp;
+	<input type="button" value="2020" class="btn" onclick="loadData(this)">
+	<input type="button" value="2021" class="btn" onclick="loadData(this)">
+	
+	<table>
+		<thead>
+			<tr>
+				<th style="width:5%">번호</th>
+				<th style="width:15%">카테고리</th>
+				<th>1월</th>
+				<th>2월</th>
+				<th>3월</th>
+				<th>4월</th>
+				<th>5월</th>
+				<th>6월</th>
+				<th>7월</th>
+				<th>8월</th>
+				<th>9월</th>
+				<th>10월</th>
+				<th>11월</th>
+				<th>12월</th>
+				<th>합계</th>
+			</tr>
+		</thead>
+		<tbody></tbody>
+	</table>
+	<div class="popup-background"></div>
+	<div class="popup-box">
+		<div class="popupHeader">
+			<span id="idxCheck" style="display:none;"></span>
+			<input type="button" id="line" value="선(line) 그래프" class="btn btn-blue" onclick="selectChart(this)">
+			<input type="button" id="bar" value="막대(bar) 그래프" class="btn" onclick="selectChart(this)">
+			<input type="button" id="popup-close" class="btn" style="float:right;" value="닫기" onclick="closePopup()">
+			<div id="clearFix" style="clear:right;"></div><hr>
+		</div><br><br><br>
+		<div class="popupContent"></div>
+	</div>
+</section>
+</body>
+</html>

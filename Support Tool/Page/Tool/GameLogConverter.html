@@ -1,0 +1,813 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Support Tool</title>
+
+<link rel="stylesheet" type="text/css" href="../../CSS/Style.css">
+<script type="text/javascript" src="../../JavaScript/Menubar.js"></script>
+<script type="text/javascript" src="../../JavaScript/LogType.js"></script>
+<script type="text/javascript" src="../../JavaScript/Data.js"></script>
+<script type="text/javascript" src="../../JQuery/jquery-3.5.1.min.js"></script>
+<style>
+	#tablebody tr { border: 1px solid #ccc; }
+	#mainType tr th { border:1px solid #ccc; background-color:#fff;cursor:pointer; }
+	#subType tr th { border:1px solid #ccc; background-color:#fff;cursor:pointer; }
+	#on { font-weight:bold; }
+	#colorTable tbody { border:0px solid #ccc; }
+	#colorTable th { width:28px; height:33px; cursor:pointer; }
+	
+	.popup-box {
+        display: none;
+		font-family: Noto Sans KR;
+        position: fixed;
+		width: 1300px;
+		height: 70%;
+        margin: 0 0 0 0;
+		padding: 0 20px 20px 20px;
+        background: #eee;
+		box-shadow: 4px 4px 4px #000;
+        z-index: 2;
+    }
+	.log-list {
+        display: none;
+		font-family: Noto Sans KR;
+        position: fixed;
+        margin: 0 0 0 0;
+		padding: 10px 15px 10px 15px;
+        background: #fff;
+		border: 1px solid #ccc;
+		box-shadow: 2px 2px 2px #A4A4A4;
+		left: 275.5px;
+        z-index: 2;
+    }
+	.color-picker {
+        display: none;
+		font-family: Noto Sans KR;
+        position: fixed;
+		width: 500px;
+		height: 40%;
+        margin: 0 0 0 0;
+		padding: 20px 20px 20px 20px;
+        background: #eee;
+		box-shadow: 4px 4px 4px #000;
+        z-index: 2;
+    }
+    .popup-background {
+        display: none;
+        position: fixed;
+        content: "";
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.5);
+        top: 0;
+        left: 0;
+        z-index: 1;
+    }
+	.topFixed {
+        position: sticky;
+        top: 70px;
+		background-color: #F2F2F2;
+		width: 100%;
+		padding: 15px 0 0 0;
+    }
+	
+	#allSelect {
+		background-color: #D8D8D8;
+		border: 1px solid #BDBDBD;
+		transition: all ease 0.25s;
+		box-shadow: inset -2px -2px 5px rgba(0,0,0,0.5);
+	}
+	
+	#allSelect:hover {
+		background-color: #585858;
+		border: 1px solid #424242;
+		color: #FFFFFF;
+	}
+	
+	#allSelect:active {
+		box-shadow: none;
+	}
+	
+	.popup-box div {
+		-ms-overflow-style: none;
+		scrollbar-width: none;
+	}
+	
+	.popup-box div::-webkit-scrollbar {
+		display: none;
+	}
+</style>
+<script type="text/javascript">
+function openPopup() {
+	$('.popup-box').css('display', 'inline-block');
+	$('.popup-background').css('display', 'inline-block');
+	$('html, body').css('overflow', 'hidden');
+}
+
+function savePopup() {
+	$('.popup-box').css('display', 'none');
+	$('.popup-background').css('display', 'none');
+	$('#btn-submit').click();
+	$('html, body').css('overflow', '');
+}
+
+function closePopup() {
+	$('.popup-box').css('display', 'none');
+	$('.popup-background').css('display', 'none');
+	$('html, body').css('overflow', '');
+}
+
+function clearPopup() {
+	$('#mainType tr').children().removeAttr('id');
+	$('#mainType tr').children().css('font-weight', '');
+	$('#mainType tr').children().css('background-color', '');
+	
+	$('#subType tr').children().removeAttr('id');
+	$('#subType tr').children().css('font-weight', '');
+	$('#subType tr').children().css('background-color', '');
+	$('#subtype tr').html("");
+	
+	$('#searchType').val("");
+	$('#mainType tr th').css("display", "");
+	$('#searchSubType').remove();
+	$('#allSelect').remove();
+	
+	multipleLog.splice(0,multipleLog.length);
+	$('.log-list').html("");
+	$('#selectedLoglist').html("");
+	
+	$('#filter').val("");
+	$('#filter').css("background-color", "");
+	$('#filter').css("font-weight", "");
+	$('#filter').removeAttr("readonly");
+	$('#filter').removeAttr("onmouseover");
+	$('#filter').removeAttr("onmouseout");
+}
+
+function openLogList() {
+	$('.log-list').css('display', 'inline-block');
+}
+
+function closeLogList() {
+	$('.log-list').css('display', 'none');
+}
+</script>
+<script type="text/javascript">
+function openColorPicker(target) {
+	$('.color-picker').css('display', 'inline-block');
+	$('.popup-background').css('display', 'inline-block');
+	$('html, body').css('overflow', 'hidden');
+	
+	var selectedRow = $(target).children().eq(5).html();
+	$('#selectedLogName').html(selectedRow);
+	$('#selectedColor tr th').html(selectedRow);
+}
+
+function previewColorPicker(target) {
+	var colorCode = $(target).css('background-color');
+	$('#selectedColor tr th').css('background-color', colorCode);
+	$('#selectedColorCode').html(colorCode);
+}
+
+function saveColorPicker() {
+	$('.color-picker').css('display', 'none');
+	$('.popup-background').css('display', 'none');
+	$('html, body').css('overflow', '');
+	
+	$('#tablebody tr th[name=' + $('#selectedLogName').html() + ']').parent().css('background-color', $('#selectedColorCode').html());
+	
+	if (colorList.indexOf($('#selectedLogName').html())>=0) {
+		colorList.splice(colorList.indexOf($('#selectedLogName').html())+1,1,$('#selectedColorCode').html());
+	}
+	else {
+		colorList.push($('#selectedLogName').html());
+		colorList.push($('#selectedColorCode').html());
+	}
+}
+
+function closeColorPicker() {
+	$('.color-picker').css('display', 'none');
+	$('.popup-background').css('display', 'none');
+	$('html, body').css('overflow', '');
+}
+
+function clearColorPicker() {
+	$('#tablebody tr').css('background-color', '');
+	$('#selectedColor tr th').css('background-color', '');
+	$('#selectedColorCode').html('');
+	
+	colorList.splice(0,colorList.length);
+}
+
+function rightClick(target) {
+	if (event.button==2) {
+		openColorPicker(target);
+	}
+}
+$(document).contextmenu(function() {
+	event.preventDefault();
+});
+</script>
+<script type="text/javascript">
+	$(function(){
+		$('#type').change(function(){
+			$('#type').val();
+			var optionfilter = $('#type').val();
+			var result = "";
+			
+			if (optionfilter == "LogName") {
+				result += "<input type='button' id='popup-open' class='btn btn-red' value='로그 찾기' onclick='openPopup()'>";
+				result += "&nbsp;";
+				result += "<input type='text' id='filter' class='input-small' style='width:200px;height:33px;' autocomplete='off' spellcheck='false'>";
+			}
+			else if (optionfilter == "Date"||optionfilter == "CharacterNo") {
+				result += "<input type='text' id='filter' class='input-small' style='width:200px;height:33px;' autocomplete='off' spellcheck='false'>";
+			}
+			$('#defaultfilter').remove();
+			$('#createfilter').html(result);
+			$('#popup-clear').click();
+		})
+	});
+</script>
+<script type="text/javascript">
+	$(function(){
+		$('#tableType').change(function(){
+			$('#tableType').val();
+			var optionTable = $('#tableType').val();
+			
+			var shortTableHead = "";
+			shortTableHead += "<tr>";
+			shortTableHead += "<th style='width:5%;'>Date</th>";
+			shortTableHead += "<th style='width:5%;'>LogNo</th>";
+			shortTableHead += "<th style='width:5%;'>AccountNo</th>";
+			shortTableHead += "<th style='width:7%;'>UserNo</th>";
+			shortTableHead += "<th style='width:7%;'>CharacterNo</th>";
+			shortTableHead += "<th style='width:9%;'>LogName</th>";
+			shortTableHead += "<th style='width:9%;'>Param0</th>";
+			shortTableHead += "<th style='width:9%;'>Param1</th>";
+			shortTableHead += "<th style='width:9%;'>Param2</th>";
+			shortTableHead += "<th style='width:9%;'>Param3</th>";
+			shortTableHead += "<th style='width:9%;'>Param4</th>";
+			shortTableHead += "<th style='width:9%;'>Param5</th>";
+			shortTableHead += "<th style='width:9%;'>Param6</th>";
+			shortTableHead += "</tr>";
+			
+			var longTableHead = "";
+			longTableHead += "<tr>";
+			longTableHead += "<th style='width:3%;'>Date</th>";
+			longTableHead += "<th style='width:3%;'>LogNo</th>";
+			longTableHead += "<th style='width:3%;'>AccountNo</th>";
+			longTableHead += "<th style='width:4%;'>UserNo</th>";
+			longTableHead += "<th style='width:4%;'>CharacterNo</th>";
+			longTableHead += "<th style='width:6%;'>LogName</th>";
+			longTableHead += "<th style='width:5%;'>Param0</th>";
+			longTableHead += "<th style='width:6%;'>Param0Name</th>";
+			longTableHead += "<th style='width:5%;'>Param1</th>";
+			longTableHead += "<th style='width:6%;'>Param1Name</th>";
+			longTableHead += "<th style='width:5%;'>Param2</th>";
+			longTableHead += "<th style='width:6%;'>Param2Name</th>";
+			longTableHead += "<th style='width:5%;'>Param3</th>";
+			longTableHead += "<th style='width:6%;'>Param3Name</th>";
+			longTableHead += "<th style='width:5%;'>Param4</th>";
+			longTableHead += "<th style='width:6%;'>Param4Name</th>";
+			longTableHead += "<th style='width:5%;'>Param5</th>";
+			longTableHead += "<th style='width:6%;'>Param5Name</th>";
+			longTableHead += "<th style='width:5%;'>Param6</th>";
+			longTableHead += "<th style='width:6%;'>Param6Name</th>";
+			longTableHead += "</tr>";
+			
+			var result = "";
+			if (optionTable == "default") {
+				result += shortTableHead;
+				$('#tableTitle').css('width', '2000px');
+			}
+			else if (optionTable == "extended") {
+				result += longTableHead;
+				$('#tableTitle').css('width', '3500px');
+			}
+			$('#tableTitle thead').html(result);
+			$('#btn-submit').click();
+		})
+	});
+</script>
+<script type="text/javascript">
+	$(function(){
+		$('#btn-submit').click(function(){
+			$('#type').val();
+			$('#filter').val();
+			$('#tableType').val();
+			var Type = $('#type').val();
+			var TableType = $('#tableType').val();
+			var Filter = $('#filter').val();
+			var Filter_Param0 = $('#filter_param0').val();
+			var Filter_Param1 = $('#filter_param1').val();
+			var Filter_Param2 = $('#filter_param2').val();
+			var Filter_Param3 = $('#filter_param3').val();
+			var Filter_Param4 = $('#filter_param4').val();
+			var Filter_Param5 = $('#filter_param5').val();
+			
+			var log = fData("log");
+			var mat = log.match(/\n/g);
+			var spl = log.split("\u000A");
+			
+			if (mat != null) {
+				count = mat.length+1;
+			}
+			else {
+				count = 1;
+			}
+			var row = count;
+			
+			var resultlog = "";
+			var unknownCount = 0;
+			for (var i = 0; i < row; i++) {				
+				if (spl[i].split("\u0009")[0]==""||spl[i].split("\u0009")[0]=='"') {
+					var column1 = "unknown";
+				}
+				else {
+					var column1 = spl[i].split("\u0009")[0].substring(0,19);
+				}
+				
+				var column2 = spl[i].split("\u0009")[1];
+				var column3 = spl[i].split("\u0009")[2];
+				var column4 = spl[i].split("\u0009")[3];
+				var column5 = spl[i].split("\u0009")[4];
+				var column6 = spl[i].split("\u0009")[8];
+				
+				if (TableType=="default") {
+					var column7 = "<strong>" + spl[i].split("\u0009")[11] + "</strong>" + "<br>" + spl[i].split("\u0009")[10];
+					var column8 = "<strong>" + spl[i].split("\u0009")[13] + "</strong>" + "<br>" + spl[i].split("\u0009")[12];
+					var column9 = "<strong>" + spl[i].split("\u0009")[15] + "</strong>" + "<br>" + spl[i].split("\u0009")[14];
+					var column10 = "<strong>" + spl[i].split("\u0009")[17] + "</strong>" + "<br>" + spl[i].split("\u0009")[16];
+					var column11 = "<strong>" + spl[i].split("\u0009")[19] + "</strong>" + "<br>" + spl[i].split("\u0009")[18];
+					var column12 = "<strong>" + spl[i].split("\u0009")[21] + "</strong>" + "<br>" + spl[i].split("\u0009")[20];
+					var column13 = "<strong>" + spl[i].split("\u0009")[23] + "</strong>" + "<br>" + spl[i].split("\u0009")[22];
+				}
+				else if (TableType=="extended") {
+					var column7 = spl[i].split("\u0009")[10];
+					var column8 = "<strong>" + spl[i].split("\u0009")[11] + "</strong>";
+					var column9 = spl[i].split("\u0009")[12];
+					var column10 = "<strong>" + spl[i].split("\u0009")[13] + "</strong>";
+					var column11 = spl[i].split("\u0009")[14];
+					var column12 = "<strong>" + spl[i].split("\u0009")[15] + "</strong>";
+					var column13 = spl[i].split("\u0009")[16];
+					var column14 = "<strong>" + spl[i].split("\u0009")[17] + "</strong>";
+					var column15 = spl[i].split("\u0009")[18];
+					var column16 = "<strong>" + spl[i].split("\u0009")[19] + "</strong>";
+					var column17 = spl[i].split("\u0009")[20];
+					var column18 = "<strong>" + spl[i].split("\u0009")[21] + "</strong>";
+					var column19 = spl[i].split("\u0009")[22];				
+					var column20 = "<strong>" + spl[i].split("\u0009")[23] + "</strong>";
+				}
+
+				if (Filter_Param0=="") {
+					var Param0 = "";
+				}
+				else {
+					var Param0 = spl[i].split("\u0009")[10];
+				}
+				
+				if (Filter_Param1=="") {
+					var Param1 = "";
+				}
+				else {
+					var Param1 = spl[i].split("\u0009")[12];
+				}
+				
+				if (Filter_Param2=="") {
+					var Param2 = "";
+				}
+				else {
+					var Param2 = spl[i].split("\u0009")[14];
+				}
+				
+				if (Filter_Param3=="") {
+					var Param3 = "";
+				}
+				else {
+					var Param3 = spl[i].split("\u0009")[16];
+				}
+				
+				if (Filter_Param4=="") {
+					var Param4 = "";
+				}
+				else {
+					var Param4 = spl[i].split("\u0009")[18];
+				}
+				
+				if (Filter_Param5=="") {
+					var Param5 = "";
+				}
+				else {
+					var Param5 = spl[i].split("\u0009")[20];
+				}
+				
+				var tempResultLog = "";
+				if (TableType=="default") {
+					$('#tableContent').css('width', '2000px');
+					if (colorList.indexOf(column6)>=0) {
+						tempResultLog += "<tr style='background-color:" + colorList[colorList.indexOf(column6)+1] + ";' onmousedown='rightClick(this)'>";
+					}
+					else {
+						tempResultLog += "<tr onmousedown='rightClick(this)'>";
+					}
+					tempResultLog += "<th style='width:5%;'>" + column1 + "</th>";
+					tempResultLog += "<th style='width:5%;'>" + column2 + "</th>";
+					tempResultLog += "<th style='width:5%;'>" + column3 + "</th>";
+					tempResultLog += "<th style='width:7%;'>" + column4 + "</th>";
+					tempResultLog += "<th style='width:7%;'>" + column5 + "</th>";
+					tempResultLog += "<th style='width:9%;word-break:break-all;' name=" + column6 + ">" + column6 + "</th>";
+					tempResultLog += "<th style='width:9%;'>" + column7 + "</th>";
+					tempResultLog += "<th style='width:9%;'>" + column8 + "</th>";
+					tempResultLog += "<th style='width:9%;'>" + column9 + "</th>";
+					tempResultLog += "<th style='width:9%;'>" + column10 + "</th>";
+					tempResultLog += "<th style='width:9%;'>" + column11 + "</th>";
+					tempResultLog += "<th style='width:9%;'>" + column12 + "</th>";
+					tempResultLog += "<th style='width:9%;'>" + column13 + "</th>";
+					tempResultLog += "</tr>";
+				}
+				else if (TableType=="extended") {
+					$('#tableContent').css('width', '3500px');
+					if (colorList.indexOf(column6)>=0) {
+						tempResultLog += "<tr style='background-color:" + colorList[colorList.indexOf(column6)+1] + ";' onmousedown='rightClick(this)'>";
+					}
+					else {
+						tempResultLog += "<tr onmousedown='rightClick(this)'>";
+					}
+					tempResultLog += "<th style='width:3%;'>" + column1 + "</th>";
+					tempResultLog += "<th style='width:3%;'>" + column2 + "</th>";
+					tempResultLog += "<th style='width:3%;'>" + column3 + "</th>";
+					tempResultLog += "<th style='width:4%;'>" + column4 + "</th>";
+					tempResultLog += "<th style='width:4%;'>" + column5 + "</th>";
+					tempResultLog += "<th style='width:6%;word-break:break-all;' name=" + column6 + ">" + column6 + "</th>";
+					tempResultLog += "<th style='width:5%;'>" + column7 + "</th>";
+					tempResultLog += "<th style='width:6%;'>" + column8 + "</th>";
+					tempResultLog += "<th style='width:5%;'>" + column9 + "</th>";
+					tempResultLog += "<th style='width:6%;'>" + column10 + "</th>";
+					tempResultLog += "<th style='width:5%;'>" + column11 + "</th>";
+					tempResultLog += "<th style='width:6%;'>" + column12 + "</th>";
+					tempResultLog += "<th style='width:5%;'>" + column13 + "</th>";
+					tempResultLog += "<th style='width:6%;'>" + column14 + "</th>";
+					tempResultLog += "<th style='width:5%;'>" + column15 + "</th>";
+					tempResultLog += "<th style='width:6%;'>" + column16 + "</th>";
+					tempResultLog += "<th style='width:5%;'>" + column17 + "</th>";
+					tempResultLog += "<th style='width:6%;'>" + column18 + "</th>";
+					tempResultLog += "<th style='width:5%;'>" + column19 + "</th>";
+					tempResultLog += "<th style='width:6%;'>" + column20 + "</th>";
+					tempResultLog += "</tr>";
+				}
+				
+				if (column1=="unknown") {
+					resultlog += "";
+					unknownCount++;
+				}
+				else if (Filter==""&&Param0==Filter_Param0&&Param1==Filter_Param1&&Param2==Filter_Param2&&Param3==Filter_Param3&&Param4==Filter_Param4&&Param5==Filter_Param5) {
+					resultlog += tempResultLog;
+				}
+				else if (Type=="LogName"&&$('#filter').val()=="#MultipleLog"&&multipleLog.indexOf(column6)>=0&&Param0==Filter_Param0&&Param1==Filter_Param1&&Param2==Filter_Param2&&Param3==Filter_Param3&&Param4==Filter_Param4&&Param5==Filter_Param5) {
+					resultlog += tempResultLog;
+				}
+				else if (Type=="LogName"&&column6.toLowerCase().indexOf(Filter.toLowerCase())>=0&&Param0==Filter_Param0&&Param1==Filter_Param1&&Param2==Filter_Param2&&Param3==Filter_Param3&&Param4==Filter_Param4&&Param5==Filter_Param5) {
+					resultlog += tempResultLog;
+				}
+				else if (Type=="CharacterNo"&&column5.indexOf(Filter)>=0&&Param0==Filter_Param0&&Param1==Filter_Param1&&Param2==Filter_Param2&&Param3==Filter_Param3&&Param4==Filter_Param4&&Param5==Filter_Param5) {
+					resultlog += tempResultLog;
+				}
+				else if (Type=="Date"&&column1.indexOf(Filter)>=0&&Param0==Filter_Param0&&Param1==Filter_Param1&&Param2==Filter_Param2&&Param3==Filter_Param3&&Param4==Filter_Param4&&Param5==Filter_Param5) {
+					resultlog += tempResultLog;
+				}
+				else {
+					resultlog += "";
+				}
+			}
+			$('#tablebody').html(resultlog);
+			var allRow = row - unknownCount;
+			var filteredRow = $('#tablebody tr').length;
+			var resultRow = "<a style='color:#2e6da4;'>" + "로그 " + "<strong>" + filteredRow + "</strong>" + "건을 검색했습니다. " + "( 전체 로그 : " + "<strong>" + allRow + "</strong>" + "건 )" + "</a>";
+			$('#resultRow').html(resultRow);
+		})
+	});
+</script>
+<script type="text/javascript">
+	$(document).ready(function(){
+		var resultTypeName = "";
+		typeMaxCount();
+		for (var i = 0; i < maxMain; i++) {
+			createLogTypeName(i, 0);
+			resultTypeName += "<tr name='" + i + "'>";
+			resultTypeName += "<th name='" + typeSplit[0].toLowerCase() + "' style='width:40px;'>" + i + "</th>";
+			resultTypeName += "<th name='" + typeSplit[0].toLowerCase() + "' style='width:250px'>" + typeSplit[0] + "</th>";
+			resultTypeName += "</tr>";
+		}
+		$('#mainType').html(resultTypeName);
+		
+		multipleLog = new Array();
+		$('#mainType tr').click(function(){
+			$('#mainType tr').children().removeAttr('id');
+			$('#mainType tr').children().css('font-weight', '');
+			$('#mainType tr').children().css('background-color', '');
+			
+			$(this).children().attr('id', 'on');
+			$(this).children().css('background-color', '#CEECF5');
+			
+			var selectedTypeNo = $(this).children().eq(0).html();
+			createLogTypeName(selectedTypeNo, 0);
+			var selectedTypeName = typeSplit[0] + "_";
+			
+			var resultSubTypeName = "";
+			for (var k = 0; k < maxSub; k++) {
+				try {
+					createLogTypeName($(this).attr('name'), k);
+					resultSubTypeName += "<tr name='" + k + "'>";
+					if (multipleLog.indexOf(typeSplit[1])>=0) {
+						resultSubTypeName += "<th id='on' name='" + typeSplit[1].replace(typeSplit[0]+"_", "").toLowerCase() + "' style='width:40px;background-color:#CEECF5;'>" + k + "</th>";
+						resultSubTypeName += "<th id='on' name='" + typeSplit[1].replace(typeSplit[0]+"_", "").toLowerCase() + "' style='width:500px;background-color:#CEECF5;'>" + typeSplit[1].replace(typeSplit[0]+"_", "") + "</th>";
+					}
+					else {
+						resultSubTypeName += "<th name='" + typeSplit[1].replace(typeSplit[0]+"_", "").toLowerCase() + "' style='width:40px;'>" + k + "</th>";
+						resultSubTypeName += "<th name='" + typeSplit[1].replace(typeSplit[0]+"_", "").toLowerCase() + "' style='width:500px;'>" + typeSplit[1].replace(typeSplit[0]+"_", "") + "</th>";
+					}
+					resultSubTypeName += "</tr>";
+				}
+				catch (err) {
+					resultSubTypeName += "";
+				}
+			}
+			$('#subType').html(resultSubTypeName);
+			
+			$('#searchSubType').remove();
+			$('#allSelect').remove();
+			var resultSearch = "";
+			resultSearch += "<input type='button' id='allSelect' class='input-small' value='All' style='width:52px;height:33px;margin-top:10px;cursor:pointer;'>";
+			resultSearch += "<input type='text' id='searchSubType' class='input-small' style='width:512px;height:33px;margin-top:10px;' placeholder='검색어를 입력하세요.' autocomplete='off'>";
+			$('#subType').parent().parent().prepend(resultSearch);
+			
+			$('#allSelect').click(function() {
+				if ($("#subType tr th").not(":hidden").not("#on").length == 0) {
+					$("#subType tr th").not(":hidden").parent().click();
+				}
+				else {
+					$("#subType tr th").not(":hidden").not("#on").parent().click();
+				}
+			})
+			
+			$('#searchSubType').change(function() {
+				$("#subType tr th").css("display", "");
+				var searchSubText = $('#searchSubType').val();
+				if (searchSubText=="") {
+					$("#subType tr th").css("display", "");
+				}
+				else {
+					$("#subType tr th").not("[name*='" + searchSubText.toLowerCase() + "']").css("display", "none");
+				}
+			})
+				
+			$('#subType tr').click(function(){
+				var selectedSubTypeNo = $(this).children().eq(0).html();
+				createLogTypeName(selectedTypeNo, selectedSubTypeNo);
+				
+				if ($(this).children().attr('id')=='on') {
+					$(this).children().attr('id', '');
+					$(this).children().css('background-color', '');
+					multipleLog.splice(multipleLog.indexOf(typeSplit[1]),1);
+				}
+				else {
+					if (multipleLog.indexOf(typeSplit[1])>=0) {
+						alert("이미 선택한 로그입니다.");
+					}
+					else {
+						$(this).children().attr('id', 'on');
+						$(this).children().css('background-color', '#CEECF5');
+						multipleLog.push(typeSplit[1]);
+					}
+				}
+				
+				var logList = "";
+				for (var l = 0; l < multipleLog.length; l++) {
+					logList += multipleLog[l];
+					logList += "<br>";
+				}
+				$('.log-list').html(logList);
+				$('#selectedLoglist').html(logList);
+				
+				if (multipleLog.length>0) {
+					$('#filter').val("#MultipleLog");
+					$('#filter').attr("onmouseover", "openLogList()");
+					$('#filter').attr("onmouseout", "closeLogList()");
+					$('#filter').css("background-color", "#eee");
+					$('#filter').css("font-weight", "bold");
+					$('#filter').attr("readonly", "readonly");
+				}
+				else {
+					$('#filter').val(selectedTypeName);
+					$('#filter').css("background-color", "");
+					$('#filter').css("font-weight", "");
+					$('#filter').removeAttr("readonly");
+					$('#filter').removeAttr("onmouseover");
+					$('#filter').removeAttr("onmouseout");
+				}
+			});
+			if (multipleLog.length==0) {
+				$('#filter').val(selectedTypeName);
+			}
+		});
+		
+		$('#searchType').change(function() {
+			$("#mainType tr th").css("display", "");
+			var searchText = $('#searchType').val();
+			if (searchText=="") {
+				$("#mainType tr th").css("display", "");
+			}
+			else {
+				$("#mainType tr th").not("[name*='" + searchText.toLowerCase() + "']").css("display", "none");
+			}
+		})
+	});
+</script>
+<script type="text/javascript">
+	$(function(){
+		$("#filter").keypress(function(event) {
+			if (event.keyCode==13) {
+				event.preventDefault();
+				$("#btn-submit").click();
+			}
+		})
+		
+		$("textarea").keypress(function(event) {
+			if (event.keyCode==13) {
+				event.preventDefault();
+				$("#btn-submit").click();
+			}
+		})
+		
+		$("#filter_param0").keypress(function(event) {
+			if (event.keyCode==13) {
+				event.preventDefault();
+				$("#btn-submit").click();
+			}
+		})
+		
+		$("#filter_param1").keypress(function(event) {
+			if (event.keyCode==13) {
+				event.preventDefault();
+				$("#btn-submit").click();
+			}
+		})
+		
+		$("#filter_param2").keypress(function(event) {
+			if (event.keyCode==13) {
+				event.preventDefault();
+				$("#btn-submit").click();
+			}
+		})
+		
+		$("#filter_param3").keypress(function(event) {
+			if (event.keyCode==13) {
+				event.preventDefault();
+				$("#btn-submit").click();
+			}
+		})
+		
+		$("#filter_param4").keypress(function(event) {
+			if (event.keyCode==13) {
+				event.preventDefault();
+				$("#btn-submit").click();
+			}
+		})
+		
+		$("#filter_param5").keypress(function(event) {
+			if (event.keyCode==13) {
+				event.preventDefault();
+				$("#btn-submit").click();
+			}
+		})
+	});
+</script>
+<script type="text/javascript">
+	$(document).ready(function() {
+		colorList = new Array();
+		var theadOffset = $('.fixedRow').offset();
+		$(window).scroll(function() {
+			if ($(document).scrollTop() > theadOffset.top-70 ) {
+				$('.fixedRow').addClass('topFixed');
+			}
+			else {
+				$('.fixedRow').removeClass('topFixed');
+			}
+		});
+	});
+</script>
+</head>
+
+<Header style="z-index:3;"><script type="text/javascript">createNavBar(1);</script></Header>
+
+<body>
+<section style="display:inline-block;margin-top:80px;">
+	<strong>게임 로그 분석 보조</strong><hr>
+	
+	검색&nbsp;
+	<select id="type" name="type">
+		<option value="LogName">LogName</option>
+		<option value="CharacterNo">CharacterNo</option>
+		<option value="Date">Date</option>
+	</select>
+	<div style="display:inline-block;" id="defaultfilter">
+		<input type="button" id="popup-open" class="btn btn-red" value="로그 찾기" onclick="openPopup()">
+		<input type="text" id="filter" class="input-small" style="width:200px;height:33px;" autocomplete="off" spellcheck="false">
+	</div>
+	<div style="display:inline-block;" id="createfilter"></div>
+	<input type="text" id="filter_param0" class="input-small" style="width:100px;height:33px;" autocomplete="off" spellcheck="false" placeholder="Param0">
+	<input type="text" id="filter_param1" class="input-small" style="width:100px;height:33px;" autocomplete="off" spellcheck="false" placeholder="Param1">
+	<input type="text" id="filter_param2" class="input-small" style="width:100px;height:33px;" autocomplete="off" spellcheck="false" placeholder="Param2">
+	<input type="text" id="filter_param3" class="input-small" style="width:100px;height:33px;" autocomplete="off" spellcheck="false" placeholder="Param3">
+	<input type="text" id="filter_param4" class="input-small" style="width:100px;height:33px;" autocomplete="off" spellcheck="false" placeholder="Param4">
+	<input type="text" id="filter_param5" class="input-small" style="width:100px;height:33px;" autocomplete="off" spellcheck="false" placeholder="Param5">
+	<input type="button" id="btn-submit" name="btn-submit" value="실행" class="btn btn-blue"><br>
+	
+	<div class="popup-background"></div>
+	<div class="popup-box">
+		<div style="display:inline-block;position:fixed;background-color:#eee;width:inherit;padding:15px 0 0 0;">
+			<input type="button" id="popup-save" class="btn btn-blue" value="저장" onclick="savePopup()">
+			<input type="button" id="popup-clear" class="btn btn-red" value="초기화" onclick="clearPopup()">
+			<input type="button" id="popup-close" class="btn" style="float:right;" value="닫기" onclick="closePopup()">
+			<hr>
+		</div><br><br><br>
+		<div style="display:inline-block;float:left;margin-right:25px;font-size:13px;height:92%;overflow-x:hidden;overflow-y:scroll;">
+			<input type="text" id="searchType" class="input-small" style="width:314px;height:33px;margin-top:10px;" placeholder="검색어를 입력하세요." autocomplete="off">
+			<table><tbody id="mainType" style="user-select:none;"></tbody></table>
+		</div>
+		<div style="display:inline-block;float:left;margin-right:25px;font-size:13px;height:92%;overflow-x:hidden;overflow-y:scroll;">
+			<table><tbody id="subType" style="user-select:none;"></tbody></table>
+		</div>
+		<div style="display:inline-block;float:left;padding-top:10px;font-size:13px;height:92%;overflow-x:hidden;overflow-y:scroll;">
+			<strong>선택한 로그 : </strong><br>
+			<a id="selectedLoglist"></a>
+		</div>
+	</div>
+	<div class="log-list" style="font-size:12px;"></div>
+	<div class="color-picker" style="font-size:13px;">
+		<input type="button" id="color-save" class="btn btn-blue" value="적용" onclick="saveColorPicker()">
+		<input type="button" id="color-save" class="btn btn-red" value="초기화" onclick="clearColorPicker()">
+		<input type="button" id="color-close" class="btn" style="float:right;" value="닫기" onclick="closeColorPicker()">
+		<hr><br>
+		<strong>선택한 로그 : </strong><a id="selectedLogName"></a>
+		<br><br>
+		<strong>미리보기 : </strong>
+		<table id="selectedColor"><tbody><tr>
+			<th style="padding:10px 20px 10px 20px;"></th>
+		</tr></tbody></table><br>
+		<strong>색상 선택 : </strong>
+		<table id="colorTable"><tbody><tr>
+			<th style="background-color:#FFFFFF;" onclick="previewColorPicker(this)"></th>
+			<th style="background-color:#F6CED8;" onclick="previewColorPicker(this)"></th>
+			<th style="background-color:#CED8F6;" onclick="previewColorPicker(this)"></th>
+			<th style="background-color:#E3CEF6;" onclick="previewColorPicker(this)"></th>
+			<th style="background-color:#CEF6CE;" onclick="previewColorPicker(this)"></th>
+			<th style="background-color:#F5F6CE;" onclick="previewColorPicker(this)"></th>
+			<th style="background-color:#F6E3CE;" onclick="previewColorPicker(this)"></th>
+		</tr></tbody></table>
+		<a id="selectedColorCode" style="font-size:12px;"></a>
+	</div>
+	
+	<br>기본 사용 방법<br>
+	<textarea id="inputbox" name="inputbox" class="input-big" style="width:1500px;resize:none;" spellcheck="false" readonly>
+1. 파란색 실행 버튼을 클릭하면 자동으로 샘플 데이터가 나옵니다. 
+
+2. 빨간색 로그 찾기 버튼을 누르면 팝업 창이 나옵니다. 여기서 원하는 로그 종류를 선택할 수 있습니다.
+
+3. 검색란 오른쪽에 있는 Param0 ~ Param5에 특정 값을 입력해서 다시 실행하면 파라미터별로 필터링할 수 있습니다.
+
+4. 결과 테이블을 우클릭하면 선택한 로그가 있는 모든 행(row)에 색상을 입힐 수 있는 팝업 창이 나옵니다.</textarea><br><br>
+
+	<div class="fixedRow">
+		<select id="tableType">
+			<option value="default">기본 형식</option>
+			<option value="extended">확장 형식</option>
+		</select>&nbsp;
+		<a id="resultRow"></a>
+		<table id="tableTitle" style="width:2000px;table-layout:fixed;">
+			<thead id="tablehead">
+				<tr>
+					<th style="width:5%;">Date</th>
+					<th style="width:5%;">LogNo</th>
+					<th style="width:5%;">AccountNo</th>
+					<th style="width:7%;">UserNo</th>
+					<th style="width:7%;">CharacterNo</th>
+					<th style="width:9%;">LogName</th>
+					<th style="width:9%;">Param0</th>
+					<th style="width:9%;">Param1</th>
+					<th style="width:9%;">Param2</th>
+					<th style="width:9%;">Param3</th>
+					<th style="width:9%;">Param4</th>
+					<th style="width:9%;">Param5</th>
+					<th style="width:9%;">Param6</th>
+				</tr>
+			</thead>
+		</table>
+	</div>
+	<table id="tableContent" style="width:2000px;table-layout:fixed;margin-top:0px;">
+		<tbody id="tablebody"></tbody>
+	</table>
+</section>
+</body>
+</html>

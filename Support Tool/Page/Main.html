@@ -1,0 +1,117 @@
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Support Tool</title>
+
+<link rel="stylesheet" type="text/css" href="../CSS/Style.css">
+<script type="text/javascript" src="../JavaScript/Menubar.js"></script>
+<script type="text/javascript" src="../JQuery/jquery-3.5.1.min.js"></script>
+<style>
+	#notice th { cursor:pointer; text-align:left; padding:10px 20px 10px 20px; font-size:13px; font-weight:bold; background-color:#F6CED8; user-select:none; }
+	#notice th:hover { background-color:#F5A9BC; text-shadow:1px 1px 1px rgba(153,153,153,1); }
+	#notice th:active { text-shadow:none; }
+	
+	#title th { cursor:pointer; text-align:left; padding:10px 20px 10px 20px; font-size:13px; font-weight:bold; background-color:#CEECF5; user-select:none; }
+	#title th:hover { background-color:#A9E2F3; text-shadow:1px 1px 1px rgba(153,153,153,1); }
+	#title th:active { text-shadow:none; }
+	
+	#content { display:none; }
+	#content th { text-align:left; padding:20px 20px 20px 20px; font-size:13px; }
+</style>
+<script type="text/javascript">
+	$(document).ready(function(){
+		var tbody_patchNote = $('#patchNote').children().eq(0);
+		var tr_patchNote = tbody_patchNote.children().eq(1);
+		
+		tr_patchNote.css('display', 'inline');
+		tbody_patchNote.children().eq(0).children().find('#fold').html("▲");
+		
+		var tbody_precaution = $('#precaution').children().eq(0);
+		var tr_precaution = tbody_precaution.children().eq(1);
+		
+		tr_precaution.css('display', 'inline');
+		tbody_precaution.children().eq(0).children().find('#fold').html("▲");
+	});
+</script>
+<script type="text/javascript">
+	$(function(){
+		$('table tbody #title').click(function(){
+			if ($(this).parent().find('#content').css('display')=="none") {
+				$(this).parent().find('#content').css('display', 'inline');
+				$(this).parent().find('#content').fadeIn(0);
+				$(this).find('#fold').html("▲");
+
+			}
+			else {
+				$(this).parent().find('#content').css('display', 'none');
+				$(this).find('#fold').html("▼");
+
+			}
+		})
+	});
+</script>
+<script type="text/javascript">
+	$(function(){
+		$('table tbody #notice').click(function(){
+			if ($(this).parent().find('#content').css('display')=="none") {
+				$(this).parent().find('#content').css('display', 'inline');
+				$(this).parent().find('#content').fadeIn(0);
+				$(this).find('#fold').html("▲");
+			}
+			else {
+				$(this).parent().find('#content').css('display', 'none');
+				$(this).find('#fold').html("▼");
+			}
+		})
+	});
+</script>
+</head>
+
+<Header><script type="text/javascript">createNavBar(0);</script></Header>
+
+<body>
+<section><strong>공지사항</strong><hr></section>
+
+<section style="margin:0 20px 20px 20px;">
+<div style="width:50%;" class="section-left">
+	<table id="patchNote" style="width:90%">
+		<tbody>
+			<tr id="title"><th>문서 기본 사용법<div id="fold" style="float:right;">▼</div></th></tr>
+			<tr id="content">
+				<th>
+					<b>1. 상단에 있는 메뉴바를 통해 원하는 페이지로 이동이 가능합니다.</b><br>
+					<br>
+					<b>2. 메뉴바에 있는 로고를 클릭하면 첫 화면으로 돌아옵니다.</b><br>
+					<br>
+					<b>3. 각 페이지별로 제공하는 기능은 다음과 같습니다.</b><br>
+					&nbsp;- 문의 카테고리 분석 : 월별 데이터를 표 형식으로 출력, 1~3순위 카테고리 표시, 행(row) 클릭 시 그래프 팝업<br>
+					&nbsp;- 우편 문구 생성 : 입력된 채팅 신고 로그를 기반으로 제재 정보와 채팅 내용을 자동으로 우편 문구에 담아 템플릿 생성<br>
+					&nbsp;- HTML 태그 생성 : 에디터 소스코드란에 붙여 넣을 수 있는 HTML 태그를 생성, 상자/표형식 2가지 디자인 지원<br>
+					&nbsp;- 게임 로그 분석 보조 : 로그 데이터를 원하는 타입만 골라 필터링, 특정 파라미터별로 필터링<br>
+				</th>
+			</tr>
+		</tbody>
+	</table>
+</div>
+</section>
+
+<section style="margin:0 20px 20px 20px;">
+<div style="width:50%;" class="section-right">
+	<table id="precaution" style="width:90%">
+		<tbody>
+			<tr id="notice"><th>안내드립니다.<div id="fold" style="float:right;">▼</div></th></tr>
+			<tr id="content">
+				<th>
+					<b>1. 이전 회사에서 실제로 실무에 사용하고 있던 UI와 기능 중 일부만 가져온 파일입니다.</b><br>
+					<br>
+					<b>2. 본 문서에 담겨져 있는 데이터는 모두 실제가 아닌 샘플입니다.</b><br>
+					<br>
+					<b>3. 모든 UI와 기능은 직접 작성하였습니다.</b><br>
+				</th>
+			</tr>	
+		</tbody>
+	</table><br><br>
+</div>
+</section>
+</body>
+</html>
